@@ -2,19 +2,29 @@
 
 namespace Plugin\SimpleNemPay\Form\Type\Admin;
 
+use Eccube\Common\EccubeConfig;
+use Plugin\SimpleNemPay\Entity\Config;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
 class ConfigType extends AbstractType
 {
-    private $app;
-    private $settingData;
+    /**
+     * @var EccubeConfig
+     */
+    protected $eccubeConfig;
 
-    public function __construct(\Eccube\Application $app, $settingData = array())
+    /**
+     * ConfigType constructor.
+     * 
+     * @param EccubeConfig $eccubeConfig
+     */
+    public function __construct(EccubeConfig $eccubeConfig)
     {
-        $this->app = $app;
-        $this->settingData = $settingData;
+        $this->eccubeConfig = $eccubeConfig;
     }
 
     /**
@@ -26,46 +36,29 @@ class ConfigType extends AbstractType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        if (!isset($this->settingData['prod_mode'])) {
-            $this->settingData['prod_mode'] = 0;
-        }
-        if (!isset($this->settingData['seller_addr'])) {
-            $this->settingData['seller_addr'] = null;
-        }
-        
         $builder
-            ->add('prod_mode', 'choice', array(
-                'label' => '環境切り替え',
-                'choices' => array(
-                    0 => 'テスト環境',
-                    1 => '本番環境',
-                ),
-                'data' => $this->settingData['prod_mode'],
+            ->add('env', ChoiceType::class, [
+                'choices' => [
+                    'テスト環境' => $this->eccubeConfig['simple_nem_pay']['env']['sandbox'],
+                    '本番環境' => $this->eccubeConfig['simple_nem_pay']['env']['prod'],
+                ],
                 'multiple' => false,
                 'expanded' => true,
-            ))
+            ])
 
-            ->add('seller_addr', 'text', array(
-                'label' => '出品者アカウント',
+            ->add('seller_nem_addr', TextType::class, [
                 'required' => false,
-                'attr' => array(
-                    'class' => 'lockon_card_row',
-                ),
-                'constraints' => array(
-                    new Assert\NotBlank(array('message' => '※ 出品者アカウントが入力されていません。')),
-                    new Assert\Length(array('max' => $this->app['config']['stext_len'])),
-                ),
-                'data' => $this->settingData['seller_addr'],
-            ))
-
-            ->addEventSubscriber(new \Eccube\Event\FormEventSubscriber());
+                'constraints' => [
+                    new Assert\NotBlank(['message' => '※ 出品者NEMアドレスが入力されていません。']),
+                    new Assert\Length(['max' => $this->eccubeConfig['eccube_stext_len']]),
+                ],
+            ]);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getName()
+    public function configureOptions(OptionsResolver $resolver)
     {
-        return 'config';
+        $resolver->setDefaults([
+            'data_class' => Config::class,
+        ]);
     }
 }
