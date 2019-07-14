@@ -2,42 +2,50 @@
 
 namespace Plugin\SimpleNemPay\Controller\Admin;
 
-use Eccube\Application;
+use Eccube\Controller\AbstractController;
 use Plugin\SimpleNemPay\Form\Type\Admin\ConfigType;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Yaml\Yaml;
 
-class ConfigController
+class ConfigController extends AbstractController
 {
+    /**
+     * @var ConfigRepository
+     */
+    protected $configRepository;
 
-    private $app;
-    private $const;
+    /**
+     * ConfigController constructor.
+     * 
+     * @param ConfigRepository $configRepository
+     */
+    public function __construct(
+        ConfigRepository $configRepository
+    ) {
+        $this->configRepository = $configRepository;
+    }
 
-    public function index(Application $app, Request $request)
+    /**
+     * @Route("/%eccube_admin_route%/simple_nem_pay/config", name="simple_nem_pay_admin_config")
+     * @Template("@SimpleNemPay/admin/config.twig")
+     */
+    public function index(Request $request)
     {
-        $this->app = $app;
-        $this->const = $app['config']['SimpleNemPay']['const'];
+        $Config = $this->configRepository->get();
+        $form = $this->createForm(ConfigType::class, $Config);
+        $form->handleRequest($request);
 
-        $nemSettings = $app['eccube.plugin.simple_nempay.repository.nem_info']->getNemSettings();
-        $configFrom = new ConfigType($this->app, $nemSettings);
-        $form = $this->app['form.factory']->createBuilder($configFrom)->getForm();
+        if ($form->isSubmitted() && $form->isValid()) {
+            $Config = $form->getData();
 
-        if ('POST' === $request->getMethod()) {
-            $form->handleRequest($request);
-            if ($form->isValid()) {
-                $formData = $form->getData();
+            $this->entityManager->persist($Config);
+            $this->entityManager->flush($Config);
 
-                // 設定値を登録
-                $app['eccube.plugin.simple_nempay.repository.nem_info']->registerSettings($formData);
-
-                $app->addSuccess('admin.register.complete', 'admin');
-                return $app->redirect($app['url_generator']->generate('plugin_SimpleNemPay_config'));
-            }
+            $this->addSuccess('simple_nem_pay.admin.save.success', 'admin');
+            return $this->redirectToRoute('simple_nem_pay_admin_config');
         }
 
-        return $this->app['view']->render('SimpleNemPay/Twig/admin/config.twig',
-            array(
-                'form' => $form->createView(),
-            ));
+        return [
+            'form' => $form->createView(),
+        ];
     }
 }
