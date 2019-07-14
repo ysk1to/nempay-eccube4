@@ -1,60 +1,70 @@
-{% extends 'default_frame.twig' %}
+{% extends '@admin/default_frame.twig' %
 
-{% block title %}かんたんNEM決済設定画面{% endblock %}
+{% set menus = ['store', 'plugin', 'plugin_list'] %}
 
-{% form_theme form 'Form/bootstrap_3_horizontal_layout.html.twig' %}
+{% block title %}{{ 'simple_nem_pay.admin.config.title'|trans }}{% endblock %}
+{% block sub_title %}{{ 'simple_nem_pay.admin.config.sub_title'|trans }}{% endblock %}
+
+{% form_theme form '@admin/Form/bootstrap_4_horizontal_layout.html.twig' %}
 
 {% block main %}
 
-    <div class="row" id="aside_wrap">
-        <form name="form1" role="form" novalidate class="form-horizontal" id="point_form" method="post" action="">
-            {{ form_widget(form._token) }}
-            <div class="col-md-9">
-
-                <div class="box">
-                    <div class="box-header">
-                        <h3 class="box-title">キー設定</h3>
-                    </div>
-                    <!-- /.box-header -->
-                    <div class="box-body">
-                        <div class="form-group">
-                            <label class="col-sm-2 control-label required">環境切り替え <span class="text-danger small">必須</span></label>
-                            <div class="col-sm-10 {% if form.prod_mode.vars.errors is not empty %}has-error{% endif %}">
-                                {{ form_widget(form.prod_mode) }}
-                                {{ form_errors(form.prod_mode) }}
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-sm-2 control-label required">出品者アカウント <span class="text-danger small">必須</span></label>
-                            <div class="col-sm-10 {% if form.seller_addr.vars.errors is not empty %}has-error{% endif %}">
-                                {{ form_widget(form.seller_addr) }}
-                                {{ form_errors(form.seller_addr) }}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-md-3" id="aside_column">
-                <div class="col_inner">
-                    <div class="box no-header">
-                        <div class="box-body">
-                            <div class="row text-center">
-                                <div class="col-sm-6 col-sm-offset-3 col-md-12 col-md-offset-0">
-                                    <button class="btn btn-primary btn-block btn-lg" onclick="document.form1.submit();">
-                                        この内容で登録する
-                                    </button>
+    <form role="form" method="post">
+        {{ form_widget(form._token) }}
+        
+        <div class="c-contentsArea__cols">
+            <div class="c-contentsArea__primaryCol">
+                <div class="c-primaryCol">
+                    <div class="card rounded border-0 mb-4">
+                        <div class="card-header"><span>{{ 'simple_nem_pay.admin.config.header'|trans }}</span></div>
+                        <!-- /.box-header -->
+                        <div class="card-body">
+                            <div class="row">
+                                <label class="col-3">{{ 'simple_nem_pay.admin.config.env'|trans }} <span class="text-danger small">必須</span></label>
+                                <div class="col mb-2">
+                                    {{ form_widget(form.env) }}
+                                    {{ form_errors(form.env) }}
                                 </div>
                             </div>
                         </div>
-                        <!-- /.box-body -->
+                        <div class="card-body">
+                            <div class="row">
+                                <label class="col-3">{{ 'simple_nem_pay.admin.config.seller_id'|trans }} <span class="text-danger small">必須</span></label>
+                                <div class="col mb-2">
+                                    {{ form_widget(form.seller_nem_addr) }}
+                                    {{ form_errors(form.seller_nem_addr) }}
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <!-- /.box -->
                 </div>
             </div>
-            <!-- /.col -->
-        </form>
-    </div>
+        </div>
+            
+        <div class="c-conversionArea">
+            <div class="c-conversionArea__container">
+                <div class="row justify-content-between align-items-center">
+                    <div class="col-6">
+                        <div class="c-conversionArea__leftBlockItem">
+                            <a class="c-baseLink"
+                               href="{{ url('admin_store_plugin') }}">
+                                <i class="fa fa-backward" aria-hidden="true"></i>
+                                <span>{{ 'simple_nem_pay.admin.config.back'|trans }}</span>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="row align-items-center justify-content-end">
+                            <div class="col-auto">
+                                <button class="btn btn-ec-conversion px-5"
+                                        type="submit">{{ 'simple_nem_pay.admin.config.save'|trans }}</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
 
 
 {% endblock %}
