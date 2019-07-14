@@ -1,0 +1,41 @@
+# nav
+simple_nem_pay.admin.nav.payment_list: かんたんNEM決済管理
+
+# flash messages
+simple_nem_pay.admin.save.success: 登録しました。
+simple_nem_pay.admin.save.failed: 登録に失敗しました。
+
+# twig
+simple_nem_pay.admin.config.title: かんたんNEM決済
+simple_nem_pay.admin.config.sub_title: プラグイン一覧
+simple_nem_pay.admin.config.header: 設定
+simple_nem_pay.admin.config.save: 登録
+simple_nem_pay.admin.config.required: 必須
+simple_nem_pay.admin.config.back: プラグイン一覧
+simple_nem_pay.admin.config.env: 環境切り替え
+simple_nem_pay.admin.config.seller_nem_addr: 出品者NEMアドレス
+simple_nem_pay.admin.payment_status.title: かんたんNEM決済管理
+simple_nem_pay.admin.payment_status.sub_title: 受注管理
+simple_nem_pay.admin.payment_status.search: 検索
+simple_nem_pay.admin.payment_status.search_result_count: 検索結果：%count%件が該当しました
+simple_nem_pay.admin.payment_status.search_condition_payment: 支払方法
+simple_nem_pay.admin.payment_status.search_condition_order_status: 対応状況
+simple_nem_pay.admin.payment_status.search_condition_nem_status: NEM決済状況
+simple_nem_pay.admin.payment_status.invalid_condition: 検索条件に誤りがあります
+simple_nem_pay.admin.payment_status.no_result: 検索条件に合致するデータが見つかりませんでした
+simple_nem_pay.admin.payment_status.change_condition: 検索条件を変えて、再度検索をお試しください。
+simple_nem_pay.admin.payment_status.display_count: %count%件
+simple_nem_pay.admin.payment_status.col_order_date: 受注日時
+simple_nem_pay.admin.payment_status.col_order_no: 注文番号
+simple_nem_pay.admin.payment_status.col_order_name: お名前
+simple_nem_pay.admin.payment_status.col_order_price: 購入金額
+simple_nem_pay.admin.payment_status.col_simple_nem_order_check: 一括取得
+simple_nem_pay.admin.payment_status.col_nem_order_status: NEM決済状況
+simple_nem_pay.admin.payment_status.col_order_staus: 対応状況
+simple_nem_pay.admin.payment_status.bulk_label: 一括操作
+simple_nem_pay.admin.payment_status.bulk_submit: 決定
+simple_nem_pay.admin.payment_status.bulk_modal_title: 一括操作の確認
+simple_nem_pay.admin.payment_status.bulk_modal_body: 複数の項目を変更します。実行してよろしいですか
+simple_nem_pay.admin.payment_status.bulk_modal_action_exec: 実行
+simple_nem_pay.admin.payment_status.bulk_modal_action_cancel: キャンセル
+simple_nem_pay.admin.payment_status.bulk_alert: 選択されていません
