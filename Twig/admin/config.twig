@@ -1,0 +1,60 @@
+{% extends 'default_frame.twig' %}
+
+{% block title %}かんたんNEM決済設定画面{% endblock %}
+
+{% form_theme form 'Form/bootstrap_3_horizontal_layout.html.twig' %}
+
+{% block main %}
+
+    <div class="row" id="aside_wrap">
+        <form name="form1" role="form" novalidate class="form-horizontal" id="point_form" method="post" action="">
+            {{ form_widget(form._token) }}
+            <div class="col-md-9">
+
+                <div class="box">
+                    <div class="box-header">
+                        <h3 class="box-title">キー設定</h3>
+                    </div>
+                    <!-- /.box-header -->
+                    <div class="box-body">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label required">環境切り替え <span class="text-danger small">必須</span></label>
+                            <div class="col-sm-10 {% if form.prod_mode.vars.errors is not empty %}has-error{% endif %}">
+                                {{ form_widget(form.prod_mode) }}
+                                {{ form_errors(form.prod_mode) }}
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label required">出品者アカウント <span class="text-danger small">必須</span></label>
+                            <div class="col-sm-10 {% if form.seller_addr.vars.errors is not empty %}has-error{% endif %}">
+                                {{ form_widget(form.seller_addr) }}
+                                {{ form_errors(form.seller_addr) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3" id="aside_column">
+                <div class="col_inner">
+                    <div class="box no-header">
+                        <div class="box-body">
+                            <div class="row text-center">
+                                <div class="col-sm-6 col-sm-offset-3 col-md-12 col-md-offset-0">
+                                    <button class="btn btn-primary btn-block btn-lg" onclick="document.form1.submit();">
+                                        この内容で登録する
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- /.box-body -->
+                    </div>
+                    <!-- /.box -->
+                </div>
+            </div>
+            <!-- /.col -->
+        </form>
+    </div>
+
+
+{% endblock %}

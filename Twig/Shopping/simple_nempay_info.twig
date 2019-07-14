@@ -1,0 +1,27 @@
+{% block main %}
+    <!-- ▼その他決済情報を表示する場合は表示 -->
+    {% if arrOther.title.name is defined %}<h2 class="heading02">■ {{ arrOther.title.name }}情報</h2>{% endif %}
+    
+    <div class="cart_item table">
+        <div class="tbody">
+            <div class="item_box tr">
+                <div class="td table">
+                    <dl class="item_detail">
+                        {% for key, item in arrOther %}
+                            {% if key != 'title' %}
+                                <dt class="item_name text-default">
+                                    {% if item.name is defined %}{{ item.name|nl2br }}:{% endif %}
+                                    {% if key == 'qr_code' %}
+                                        {{ item.value|raw }}
+                                    {% else %}
+                                        {{ item.value|nl2br }}
+                                    {% endif %}
+                                 </dt>
+                            {% endif %}
+                        {% endfor %}
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

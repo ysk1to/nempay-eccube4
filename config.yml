@@ -1,0 +1,12 @@
+name: かんたんNEM決済
+code: SimpleNemPay
+version: 1.0.0
+service:
+    - SimpleNemPayServiceProvider
+event: SimpleNemPay
+orm.path:
+    - /Resource/doctrine
+    - /Resource/doctrine/master
+const:
+    PLUGIN_CODE: SimpleNemPay
+    TICKER_URL: https://api.zaif.jp/api/1/ticker/xem_jpy

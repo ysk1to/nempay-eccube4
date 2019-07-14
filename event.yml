@@ -1,0 +1,10 @@
+eccube.event.render.shopping.before:
+    - [onRenderShoppingBefore, NORMAL]
+eccube.event.render.shopping_complete.before:
+    - [onRenderShoppingCompleteBefore, NORMAL]
+
+eccube.event.controller.shopping_confirm.before:
+    - [onControllerShoppingConfirmBefore, NORMAL]
+
+mail.order:
+    - [onSendOrderMail, NOMAL]
