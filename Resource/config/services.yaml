@@ -1,0 +1,3 @@
+parameters:
+  simple_nem_pay:
+    ticker_url: https://api.zaif.jp/api/1/ticker/xem_jpy
