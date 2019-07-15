@@ -1,0 +1,9 @@
+{
+  "name": "ec-cube/SimpleNemPay",
+  "version": "1.0.0",
+  "description": "かんたんNEM決済プラグイン",
+  "type": "eccube-plugin",
+  "extra": {
+    "code": "SimpleNemPay"
+  }
+}
