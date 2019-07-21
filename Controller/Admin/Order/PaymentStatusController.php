@@ -1,6 +1,6 @@
 <?php
 
-namespace Plugin\SimpleNemPay\Controller\Admin;
+namespace Plugin\SimpleNemPay\Controller\Admin\Order;
 
 use Eccube\Common\Constant;
 use Eccube\Controller\AbstractController;
