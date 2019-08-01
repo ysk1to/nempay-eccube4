@@ -4,6 +4,7 @@ namespace Plugin\SimpleNemPay\Command;
 
 use Plugin\SimpleNemPay\Entity\NemOrder;
 use Plugin\SimpleNemPay\Entity\NemHistory;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -17,7 +18,7 @@ use Symfony\Component\Console\Input\InputOption;
  *
  * crontab  ex. 0 * * * * /usr/bin/php /var/www/html/eccube-3.0.15/app/console simple_nempay:remittance_confirm
  */
-class RemittanceConfirmBatchCommand extends \Knp\Command\Command
+class RemittanceConfirmBatchCommand extends Command
 {
 
     private $app;

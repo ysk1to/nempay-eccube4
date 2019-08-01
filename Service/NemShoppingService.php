@@ -8,8 +8,6 @@ use Eccube\Application;
 use Eccube\Entity\MailHistory;
 use Eccube\Entity\Order;
 
-require_once(__DIR__.'/../Vendor/Image/QRCode.php');
-
 class NemShoppingService
 {
     /** @var \Eccube\Application */
@@ -121,11 +119,11 @@ __EOS__;
         
         $filepath = $this->getQrcodeImagePath($Order);
 
-        $qr = new \Image_QRCode();
-        $image = $qr->makeCode(json_encode($arrData), 
-                               array('output_type' => 'return'));
-        imagepng($image, $filepath);
-        imagedestroy($image);
+        // $qr = new \Image_QRCode();
+        // $image = $qr->makeCode(json_encode($arrData), 
+        //                        array('output_type' => 'return'));
+        // imagepng($image, $filepath);
+        // imagedestroy($image);
     }
     
     function confirmNemRemittance($arrNemOrder) {
