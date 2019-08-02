@@ -72,7 +72,7 @@ class Config extends AbstractEntity
     /**
      * {@inheritdoc}
      */
-    public function getSellerNemAdd()
+    public function getSellerNemAddr()
     {
         return $this->seller_nem_addr;
     }

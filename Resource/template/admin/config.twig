@@ -1,4 +1,4 @@
-{% extends '@admin/default_frame.twig' %
+{% extends '@admin/default_frame.twig' %}
 
 {% set menus = ['store', 'plugin', 'plugin_list'] %}
 
@@ -17,7 +17,6 @@
                 <div class="c-primaryCol">
                     <div class="card rounded border-0 mb-4">
                         <div class="card-header"><span>{{ 'simple_nem_pay.admin.config.header'|trans }}</span></div>
-                        <!-- /.box-header -->
                         <div class="card-body">
                             <div class="row">
                                 <label class="col-3">{{ 'simple_nem_pay.admin.config.env'|trans }} <span class="text-danger small">必須</span></label>
@@ -29,7 +28,7 @@
                         </div>
                         <div class="card-body">
                             <div class="row">
-                                <label class="col-3">{{ 'simple_nem_pay.admin.config.seller_id'|trans }} <span class="text-danger small">必須</span></label>
+                                <label class="col-3">{{ 'simple_nem_pay.admin.config.seller_nem_addr'|trans }} <span class="text-danger small">必須</span></label>
                                 <div class="col mb-2">
                                     {{ form_widget(form.seller_nem_addr) }}
                                     {{ form_errors(form.seller_nem_addr) }}

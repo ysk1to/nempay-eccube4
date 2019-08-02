@@ -4,6 +4,9 @@ namespace Plugin\SimpleNemPay\Controller\Admin;
 
 use Eccube\Controller\AbstractController;
 use Plugin\SimpleNemPay\Form\Type\Admin\ConfigType;
+use Plugin\SimpleNemPay\Repository\ConfigRepository;
+use Symfony\Component\Routing\Annotation\Route;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Component\HttpFoundation\Request;
 
 class ConfigController extends AbstractController

@@ -52,12 +52,12 @@ class PaymentStatusController extends AbstractController
      * @param OrderStatusRepository $orderStatusRepository
      */
     public function __construct(
-        SimpleNemStatusRepository $simple_nemStatusRepository,
+        SimpleNemStatusRepository $simpleNemStatusRepository,
         PageMaxRepository $pageMaxRepository,
         OrderRepository $orderRepository,
         PaymentRepository $paymentRepository
     ) {
-        $this->simple_nemStatusRepository = $simple_nemStatusRepository;
+        $this->simpleNemStatusRepository = $simpleNemStatusRepository;
         $this->pageMaxRepository = $pageMaxRepository;
         $this->orderRepository = $orderRepository;
         $this->paymentRepository = $paymentRepository;

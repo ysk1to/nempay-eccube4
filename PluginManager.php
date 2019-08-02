@@ -8,6 +8,7 @@ use Eccube\Entity\PaymentOption;
 use Eccube\Repository\PaymentRepository;
 use Eccube\Repository\DeliveryRepository;
 use Plugin\SimpleNemPay\Entity\Config;
+use Plugin\SimpleNemPay\Entity\Master\SimpleNemStatus;
 use Plugin\SimpleNemPay\Service\Method\SimpleNemPay;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
