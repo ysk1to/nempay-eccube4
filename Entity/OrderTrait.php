@@ -13,21 +13,21 @@ trait OrderTrait
     /**
      * @var float
      * 
-     * @ORM\Column(name="rate", type="decimal", precision=12, scale=2)
+     * @ORM\Column(name="nem_rate", type="decimal", precision=12, scale=2, nullable=true)
      */
     private $rate;
 
     /**
      * @var float
      * 
-     * @ORM\Column(name="payment_amount", type="decimal", precision=12, scale=2)
+     * @ORM\Column(name="nem_payment_amount", type="decimal", precision=12, scale=2, nullable=true)
      */
     private $payment_amount;
 
     /**
      * @var float
      * 
-     * @ORM\Column(name="remittance_amount", type="decimal", precision=12, scale=2)
+     * @ORM\Column(name="nem_remittance_amount", type="decimal", precision=12, scale=2, nullable=true)
      */
     private $remittance_amount;
 
