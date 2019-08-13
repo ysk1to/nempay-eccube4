@@ -9,9 +9,9 @@ use Eccube\Entity\Master\AbstractMasterEntity;
  * SimpleNemStatus
  * 
  * @ORM\Table(name="plg_simple_nem_pay_status")
- * @ORM\Entity(repositoryClass="Plugin\SimpleNemPay\Repository\Master\SimpleNemStatusRepository")
+ * @ORM\Entity(repositoryClass="Plugin\SimpleNemPay\Repository\Master\NemStatusRepository")
  */
-class SimpleNemStatus extends AbstractMasterEntity
+class NemStatus extends AbstractMasterEntity
 {
     /**
      * 送金待ち

@@ -7,6 +7,8 @@ use Eccube\Service\Payment\PaymentMethodInterface;
 use Eccube\Service\Payment\PaymentResult;
 use Eccube\Service\PurchaseFlow\PurchaseContext;
 use Eccube\Service\PurchaseFlow\PurchaseFlow;
+use Plugin\SimpleNemPay\Entity\Master\NemStatus;
+use Plugin\SimpleNemPay\Repository\Master\NemStatusRepository;
 use Symfony\Component\Form\FormInterface;
 
 class SimpleNemPay implements PaymentMethodInterface
@@ -15,9 +17,11 @@ class SimpleNemPay implements PaymentMethodInterface
      * @param PurchaseFlow $shoppingPurchaseFlow
      */
     public function __construct(
-            PurchaseFlow $shoppingPurchaseFlow
+            PurchaseFlow $shoppingPurchaseFlow,
+            NemStatusRepository $nemStatusRepository
     ) {
         $this->purchaseFlow = $shoppingPurchaseFlow;
+        $this->nemStatusRepository = $nemStatusRepository;
     }
 
     /**
@@ -43,6 +47,9 @@ class SimpleNemPay implements PaymentMethodInterface
      */ 
     public function checkout()
     {
+        $NemStatus = $this->nemStatusRepository->find(NemStatus::PAY_WATING);
+        $this->Order->setNemStatus($NemStatus);
+
         $this->purchaseFlow->commit($this->Order, new PurchaseContext());
 
         $result = new PaymentResult();

@@ -32,6 +32,15 @@ trait OrderTrait
     private $nem_remittance_amount;
 
     /**
+     * @var NemStatus
+     * @ORM\ManyToOne(targetEntity="Plugin\SimpleNemPay\Entity\Master\NemStatus")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="nem_status_id", referencedColumnName="id")
+     * })
+     */
+    private $NemStatus;
+
+    /**
      * @var \Doctrine\Common\Collections\Collection
      * 
      * @ORM\OneToMany(targetEntity="Plugin\SimpleNemPay\Entity\SimpleNemHistory", mappedBy="Order", cascade={"persist", "remove"})
@@ -90,6 +99,24 @@ trait OrderTrait
     public function getNemRemittanceAmount()
     {
         return $this->nem_remittance_amount;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setNemStatus(\Plugin\SimpleNemPay\Entity\Master\NemStatus $NemStatus)
+    {
+        $this->NemStatus = $NemStatus;
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getNemStatus()
+    {
+        return $this->NemStatus;
     }
 
     /**

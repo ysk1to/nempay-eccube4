@@ -3,13 +3,13 @@
 namespace Plugin\SimpleNemPay\Repository\Master;
 
 use Eccube\Repository\AbstractRepository;
-use Plugin\SimpleNemPay\Entity\Master\SimpleNemStatus;
+use Plugin\SimpleNemPay\Entity\Master\NemStatus;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 
-class SimpleNemStatusRepository extends AbstractRepository
+class NemStatusRepository extends AbstractRepository
 {
     public function __construct(RegistryInterface $registry)
     {
-        parent::__construct($registry, SimpleNemStatus::class);
+        parent::__construct($registry, NemStatus::class);
     }
 }
