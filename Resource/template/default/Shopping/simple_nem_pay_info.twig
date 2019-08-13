@@ -1,0 +1,39 @@
+{% block simple_nem_pay_info_form %}
+<script>
+$(function() {
+    $('div.ec-rectHeading h2').each(function() {
+        if($(this).html() == 'お支払方法') {
+            $(this).closest('.ec-orderPayment').after($('#simple_nem_pay_info'))
+        }
+    });
+})</script>
+
+<div class="ec-orderPayment" id="simple_nem_pay_info">
+    <div class="ec-rectHeading">
+        <h2>かんたんNEM決済お支払い情報</h2>
+    </div>
+    <div class="ec-off1Grid">
+        <div class="ec-off1Grid__cell">
+            <div class="ec-borderedDefs">
+                <dl>
+                    <dt>
+                        <label class="ec-label">お支払い金額（XEM）</label>
+                    </dt>
+                    <dd>
+                        {{ nem_payment_amount }} XEM
+                    </dd>
+                </dl>
+                <dl>
+                    <dt>
+                        <label class="ec-label">参考レート(24時間平均)</label>
+                    </dt>
+                    <dd>
+                        {{ nem_rate }} 円／XEM
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+ </div>
+
+{% endblock %}

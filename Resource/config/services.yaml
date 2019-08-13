@@ -1,6 +1,9 @@
 parameters:
   simple_nem_pay:
     ticker_url: https://api.zaif.jp/api/1/ticker/xem_jpy
+    nis_url:
+      sandbox: http://104.128.226.60:7890
+      prod: http://alice3.nem.ninja:7890
     env:
       sandbox: 1
       prod: 2

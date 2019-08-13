@@ -15,21 +15,21 @@ trait OrderTrait
      * 
      * @ORM\Column(name="nem_rate", type="decimal", precision=12, scale=2, nullable=true)
      */
-    private $rate;
+    private $nem_rate;
 
     /**
      * @var float
      * 
      * @ORM\Column(name="nem_payment_amount", type="decimal", precision=12, scale=2, nullable=true)
      */
-    private $payment_amount;
+    private $nem_payment_amount;
 
     /**
      * @var float
      * 
      * @ORM\Column(name="nem_remittance_amount", type="decimal", precision=12, scale=2, nullable=true)
      */
-    private $remittance_amount;
+    private $nem_remittance_amount;
 
     /**
      * @var \Doctrine\Common\Collections\Collection
@@ -41,9 +41,9 @@ trait OrderTrait
     /**
      * {@inheritdoc}
      */
-    public function setRate($rate)
+    public function setNemRate($nemRate)
     {
-        $this->rate = $rate;
+        $this->nem_rate = $nemRate;
 
         return $this;
     }
@@ -51,17 +51,17 @@ trait OrderTrait
     /**
      * {@inheritdoc}
      */
-    public function getRate()
+    public function getNemRate()
     {
-        return $this->rate;
+        return $this->nem_rate;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function setPaymentAmount($paymentAmount)
+    public function setNemPaymentAmount($nemPaymentAmount)
     {
-        $this->payment_amount = $paymentAmount;
+        $this->nem_payment_amount = $nemPaymentAmount;
 
         return $this;
     }
@@ -69,17 +69,17 @@ trait OrderTrait
     /**
      * {@inheritdoc}
      */
-    public function getPaymentAmount()
+    public function getNemPaymentAmount()
     {
-        return $this->payment_amount;
+        return $this->nem_payment_amount;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function setRemittanceAmount($remittanceAmount)
+    public function setNemRemittanceAmount($nemRemittanceAmount)
     {
-        $this->remittance_amount = $remittanceAmount;
+        $this->nem_remittance_amount = $nemRemittanceAmount;
 
         return $this;
     }
@@ -87,9 +87,9 @@ trait OrderTrait
     /**
      * {@inheritdoc}
      */
-    public function getRemittanceAmount()
+    public function getNemRemittanceAmount()
     {
-        return $this->remittance_amount;
+        return $this->nem_remittance_amount;
     }
 
     /**
