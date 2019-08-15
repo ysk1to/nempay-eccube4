@@ -6,7 +6,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Eccube\Entity\Master\AbstractMasterEntity;
 
 /**
- * SimpleNemStatus
+ * NemStatus
  * 
  * @ORM\Table(name="plg_simple_nem_pay_status")
  * @ORM\Entity(repositoryClass="Plugin\SimpleNemPay\Repository\Master\NemStatusRepository")

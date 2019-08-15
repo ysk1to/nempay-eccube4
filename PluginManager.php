@@ -8,7 +8,7 @@ use Eccube\Entity\PaymentOption;
 use Eccube\Repository\PaymentRepository;
 use Eccube\Repository\DeliveryRepository;
 use Plugin\SimpleNemPay\Entity\Config;
-use Plugin\SimpleNemPay\Entity\Master\SimpleNemStatus;
+use Plugin\SimpleNemPay\Entity\Master\NemStatus;
 use Plugin\SimpleNemPay\Service\Method\SimpleNemPay;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -126,19 +126,19 @@ class PluginManager extends AbstractPluginManager
 
         $i = 0;
         foreach ($statuses as $id => $name) {
-            $SimpleNemStatus = $entityManage->find(SimpleNemStatus::class, $id);
-            if ($SimpleNemStatus) {
+            $NemStatus = $entityManage->find(NemStatus::class, $id);
+            if ($NemStatus) {
                 continue;
             }
 
-            $SimpleNemStatus = new SimpleNemStatus();
+            $NemStatus = new NemStatus();
 
-            $SimpleNemStatus->setId($id);
-            $SimpleNemStatus->setName($name);
-            $SimpleNemStatus->setSortNo($i++);
+            $NemStatus->setId($id);
+            $NemStatus->setName($name);
+            $NemStatus->setSortNo($i++);
 
-            $entityManage->persist($SimpleNemStatus);
-            $entityManage->flush($SimpleNemStatus);
+            $entityManage->persist($NemStatus);
+            $entityManage->flush($NemStatus);
         }
     }
 }

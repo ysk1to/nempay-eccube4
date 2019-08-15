@@ -12,7 +12,7 @@ use Eccube\Util\FormUtil;
 use Knp\Component\Pager\PaginatorInterface;
 use Plugin\SimpleNemPay\Form\Type\Admin\SearchPaymentType;
 use Plugin\SimpleNemPay\Service\Method\SimpleNemPay;
-use Plugin\SimpleNemPay\Repository\Master\SimpleNemStatusRepository;
+use Plugin\SimpleNemPay\Repository\Master\NemStatusRepository;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Component\HttpFoundation\Request;
@@ -52,7 +52,7 @@ class PaymentStatusController extends AbstractController
      * @param OrderStatusRepository $orderStatusRepository
      */
     public function __construct(
-        SimpleNemStatusRepository $simpleNemStatusRepository,
+        NemStatusRepository $simpleNemStatusRepository,
         PageMaxRepository $pageMaxRepository,
         OrderRepository $orderRepository,
         PaymentRepository $paymentRepository
@@ -181,7 +181,7 @@ class PaymentStatusController extends AbstractController
         $Payment = $this->paymentRepository->findOneBy(array('method_class' => SimpleNemPay::class));
         $qb->andWhere('o.Payment = :Payment')
             ->setParameter('Payment', $Payment)
-            ->andWhere('o.SimpleNemStatus IS NOT NULL');
+            ->andWhere('o.NemStatus IS NOT NULL');
 
         // 決済済みのみ
         $qb->andWhere('o.order_date IS NOT NULL');
@@ -191,9 +191,9 @@ class PaymentStatusController extends AbstractController
                 ->setParameter('OrderStatuses', $searchData['OrderStatuses']);
         }
 
-        if (!empty($searchData['SimpleNemStatuses']) && count($searchData['SimpleNemStatuses']) > 0) {
-            $qb->andWhere($qb->expr()->in('o.SimpleNemStatus', ':SimpleNemStatuses'))
-                ->setParameter('SimpleNemStatuses', $searchData['SimpleNemStatuses']);
+        if (!empty($searchData['NemStatuses']) && count($searchData['NemStatuses']) > 0) {
+            $qb->andWhere($qb->expr()->in('o.NemStatus', ':NemStatuses'))
+                ->setParameter('NemStatuses', $searchData['NemStatuses']);
         }
 
         return $qb;

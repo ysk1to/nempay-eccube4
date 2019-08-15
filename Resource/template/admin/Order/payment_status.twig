@@ -175,8 +175,8 @@
                         <div class="form-row">
                             <div class="form-group col-12">
                                 <p class="col-form-label">{{ 'simple_nem_pay.admin.payment_status.search_condition_simple_nem_status'|trans }}</p>
-                                {{ form_widget(searchForm.SimpleNemStatuses, {'label_attr': {'class': 'checkbox-inline'}}) }}
-                                {{ form_errors(searchForm.SimpleNemStatuses) }}
+                                {{ form_widget(searchForm.NemStatuses, {'label_attr': {'class': 'checkbox-inline'}}) }}
+                                {{ form_errors(searchForm.NemStatuses) }}
                             </div>
                         </div>
                     </div>
@@ -271,9 +271,9 @@
                                     </tr>
                                     </thead>
                                     <tbody>
-                                    {% set cssClassSimpleNemStatus = {
-                                        (constant('Plugin\\SimpleNemPay\\Entity\\Master\\SimpleNemStatus::PAY_WATING')): "badge-ec-blue",
-                                        (constant('Plugin\\SimpleNemPay\\Entity\\Master\\SimpleNemStatus::PAY_DONE')): "badge-ec-green",
+                                    {% set cssClassNemStatus = {
+                                        (constant('Plugin\\SimpleNemPay\\Entity\\Master\\NemStatus::PAY_WATING')): "badge-ec-blue",
+                                        (constant('Plugin\\SimpleNemPay\\Entity\\Master\\NemStatus::PAY_DONE')): "badge-ec-green",
                                     }
                                     %}
                                     {% for Order in pagination %}
@@ -292,7 +292,7 @@
 
                                             </td>
                                             <td class="align-middle text-center">
-                                                <span class="badge {{ attribute(cssClassSimpleNemStatus, Order.SimpleNemStatus.id)}} ">{{ Order.SimpleNemStatus.name }}</span>
+                                                <span class="badge {{ attribute(cssClassNemStatus, Order.NemStatus.id)}} ">{{ Order.NemStatus.name }}</span>
                                             </td>
                                             <td class="align-middle text-center"  id="order_status--{{ Order.id }}">
                                                 <span class="badge badge-ec-blue" style="background-color: #fff; color: {{ Order.OrderStatusColor }}; border-color: {{ Order.OrderStatusColor }}">{{ Order.OrderStatus }}</span>
