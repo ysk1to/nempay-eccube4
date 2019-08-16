@@ -12,52 +12,31 @@
 
 {% block javascript %}
     <script>
-        $('#capture_all_check').click(function() {
-        var simple_nem_checkall = $('#capture_all_check').prop('checked');
+        $('#confirm_all_check').click(function() {
+        var simple_nem_checkall = $('#confirm_all_check').prop('checked');
         if (simple_nem_checkall) {
-            $('input[id^=capture_check_]').prop('checked', true);
+            $('input[id^=confirm_check_]').prop('checked', true);
         } else {
-            $('input[id^=capture_check_]').prop('checked', false);
+            $('input[id^=confirm_check_]').prop('checked', false);
         }
     });
 
-    $('#cancel_all_check').click(function() {
-        var simple_nem_checkall = $('#cancel_all_check').prop('checked');
-        if (simple_nem_checkall) {
-            $('input[id^=cancel_check_]').prop('checked', true);
-        } else {
-            $('input[id^=cancel_check_]').prop('checked', false);
-        }
-    });
-
-    $('[id^=capture_link_]').click(function(event) {
+    $('[id^=confirm_link_]').click(function(event) {
         event.preventDefault();
         var id = $(this).attr('id');
         var order_id = id.slice(id.lastIndexOf('_') + 1);
 
-        if (confirm('売上処理を実行します。よろしいですか？')) {
+        if (confirm('選択受注のNEM決済状況の確認を行います。よろしいですか？')) {
             $('#simple_nem_order_id').val(order_id);
-            $('#simple_nem_request').val('capture');
+            $('#simple_nem_request').val('confirm');
             $('#form_bulk').submit();
         }
     });
 
-    $('[id^=cancel_link_]').click(function(event) {
-        event.preventDefault();
-        var id = $(this).attr('id');
-        var order_id = id.slice(id.lastIndexOf('_') + 1);
-
-        if (confirm('取消処理を実行します。よろしいですか？')) {
-            $('#simple_nem_order_id').val(order_id);
-            $('#simple_nem_request').val('cancel');
-            $('#form_bulk').submit();
-        }
-    });
-
-    $('#capture_button').click(function(event) {
+    $('#confirm_button').click(function(event) {
         event.preventDefault();
         var isChecked = false;
-        $('input[id^=capture_check_]').each(function() {
+        $('input[id^=confirm_check_]').each(function() {
             var check = $(this).prop('checked');
             if (check) {
                 isChecked = true;
@@ -67,89 +46,11 @@
             alert("チェックボックスが選択されていません");
             return false;
         }
-        if (confirm('売上処理を実行します。よろしいですか？')) {
-            $('#simple_nem_request').val('capture');
+        if (confirm('選択受注のNEM決済状況の確認を行います。よろしいですか？')) {
+            $('#simple_nem_request').val('confirm');
             $('#form_bulk').submit();
         }
     });
-
-    $('#cancel_button').click(function(event) {
-        event.preventDefault();
-        var isChecked = false;
-        $('input[id^=cancel_check_]').each(function() {
-            var check = $(this).prop('checked');
-            if (check) {
-                isChecked = true;
-            }
-        });
-        if (!isChecked) {
-            alert("チェックボックスが選択されていません");
-            return false;
-        }
-        if (confirm('取消処理を実行します。よろしいですか？')) {
-            $('#simple_nem_request').val('cancel');
-            $('#form_bulk').submit();
-        }
-    });
-    </script>
-    <script>
-        $(function () {
-            toggleBtnBulk('input[id^="check_"]', '.btn-bulk-wrapper');
-            $('input[id^="check_"]').on('change', function() {
-                toggleBtnBulk('input[id^="check_"]', '.btn-bulk-wrapper');
-            });
-
-            // 登録チェックボックス
-            $('#check_all').on('change', function() {
-                var checked = $(this).prop('checked');
-                if (checked) {
-                    $('input[id^="check_"]').prop('checked', true);
-                } else {
-                    $('input[id^="check_"]').prop('checked', false);
-                }
-                toggleBtnBulk('input[id^="check_"]', '.btn-bulk-wrapper');
-            });
-
-            $('#btn_bulk_status').on('bulk-submit', function (event) {
-                var value = $('#option_bulk_status').val();
-                if (!value) {
-                    $(this).data('cancel', true);
-                    alert("{{ 'simple_nem_pay.admin.payment_status.bulk_alert'|trans }}");
-                    return false;
-                }
-                $(this).data('cancel', false);
-                $(this).data('url', value);
-            });
-            var bulkAction = function (form, modal) {
-                modal.find('[data-action="execute"]').on('click', function () {
-                    form.submit();
-                });
-                form.find('[data-submit="bulk"]').on('click', function (event) {
-                    event.preventDefault();
-
-                    if (!form.find('input:checkbox[name^="ids"]:checked').length) {
-                        alert("{{ 'simple_nem_pay.admin.payment_status.bulk_alert'|trans }}");
-                        return false;
-                    }
-
-                    $(this).trigger('bulk-submit');
-                    if ($(this).data('cancel') === true) {
-                        return false;
-                    }
-
-                    form.attr('action', $(this).data('url'));
-                    form.attr('method', $(this).data('method') || 'POST');
-
-                    if ($(this).data('confirm')) {
-                        modal.modal('show');
-                    } else {
-                        form.submit();
-                    }
-
-                });
-            };
-            bulkAction($('#form_bulk'), $('#confirmBulkModal'));
-        });
     </script>
 {% endblock javascript %}
 
@@ -174,7 +75,7 @@
                     <div class="col-12">
                         <div class="form-row">
                             <div class="form-group col-12">
-                                <p class="col-form-label">{{ 'simple_nem_pay.admin.payment_status.search_condition_simple_nem_status'|trans }}</p>
+                                <p class="col-form-label">{{ 'simple_nem_pay.admin.payment_status.search_condition_nem_status'|trans }}</p>
                                 {{ form_widget(searchForm.NemStatuses, {'label_attr': {'class': 'checkbox-inline'}}) }}
                                 {{ form_errors(searchForm.NemStatuses) }}
                             </div>
@@ -256,17 +157,11 @@
                                         <th class="border-top-0 pt-2 pb-2 text-center">{{ 'simple_nem_pay.admin.payment_status.col_order_name'|trans }}</th>
                                         <th class="border-top-0 pt-2 pb-2 text-center">{{ 'simple_nem_pay.admin.payment_status.col_order_price'|trans }}</th>
                                         <th class="border-top-0 pt-2 pb-2 text-center">
-                                            <input type="checkbox" id="capture_all_check" name="capture" />
-                                            <label for="capture_all_check">{{ 'simple_nem_pay.admin.payment_status.col_simple_nem_order_capture'|trans }}</label>
-                                            <input type="button" id="capture_button" value="実行" />
+                                            <input type="checkbox" id="confirm_all_check" name="confirm" />
+                                            <label for="confirm_all_check">{{ 'simple_nem_pay.admin.payment_status.col_simple_nem_order_check'|trans }}</label>
+                                            <input type="button" id="confirm_button" value="実行" />
                                         </th>
-                                        <th class="border-top-0 pt-2 pb-2 text-center">
-                                            <input type="checkbox" id="cancel_all_check" name="cancel" />
-                                            <label for="cancel_all_check">{{ 'simple_nem_pay.admin.payment_status.col_simple_nem_order_cancel'|trans }}</label>
-                                            <input type="button" id="cancel_button" value="実行" />
-                                        </th>
-                                        <th class="border-top-0 pt-2 pb-2 text-center">{{ 'simple_nem_pay.admin.payment_status.col_simple_nem_order_reference_id'|trans }}</th>
-                                        <th class="border-top-0 pt-2 pb-2 text-center">{{ 'simple_nem_pay.admin.payment_status.col_simple_nem_order_status'|trans }}</th>
+                                        <th class="border-top-0 pt-2 pb-2 text-center">{{ 'simple_nem_pay.admin.payment_status.col_nem_order_status'|trans }}</th>
                                         <th class="border-top-0 pt-2 pb-2 text-center">{{ 'simple_nem_pay.admin.payment_status.col_order_staus'|trans }}</th>
                                     </tr>
                                     </thead>
@@ -283,13 +178,9 @@
                                             <td class="align-middle text-center" id="name--{{ Order.id }}">{{ Order.name01 }} {{ Order.name02 }}</td>
                                             <td class="align-middle text-right" id="payment_total--{{ Order.id }}">{{ Order.payment_total|price }}</td>
                                             <td class="align-middle text-center">
-                                            
-                                            </td>
-                                            <td class="align-middle text-center">
-                                            
-                                            </td>
-                                            <td class="align-middle text-center">
-
+                                                {% if Order.NemStatus.id == constant('Plugin\\SimpleNemPay\\Entity\\Master\\NemStatus::PAY_WATING') %}
+                                                    <input type="checkbox" name="confirm_id[]" id="confirm_check_{{ Order.id }}" value="{{ Order.id }}"/>
+                                                {% endif %}
                                             </td>
                                             <td class="align-middle text-center">
                                                 <span class="badge {{ attribute(cssClassNemStatus, Order.NemStatus.id)}} ">{{ Order.NemStatus.name }}</span>

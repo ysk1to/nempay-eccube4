@@ -29,7 +29,7 @@ simple_nem_pay.admin.payment_status.col_order_date: 受注日時
 simple_nem_pay.admin.payment_status.col_order_no: 注文番号
 simple_nem_pay.admin.payment_status.col_order_name: お名前
 simple_nem_pay.admin.payment_status.col_order_price: 購入金額
-simple_nem_pay.admin.payment_status.col_simple_nem_order_check: 一括取得
+simple_nem_pay.admin.payment_status.col_simple_nem_order_check: 決済状況確認
 simple_nem_pay.admin.payment_status.col_nem_order_status: NEM決済状況
 simple_nem_pay.admin.payment_status.col_order_staus: 対応状況
 simple_nem_pay.admin.payment_status.bulk_label: 一括操作

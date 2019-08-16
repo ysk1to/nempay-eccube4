@@ -2,7 +2,11 @@
 
 namespace Plugin\SimpleNemPay\Service;
 
+use Doctrine\ORM\EntityManagerInterface;
 use Eccube\Common\EccubeConfig;
+use Eccube\Entity\Master\OrderStatus;
+use Eccube\Repository\Master\OrderStatusRepository;
+use Plugin\SimpleNemPay\Entity\NemHistory;
 use Plugin\SimpleNemPay\Repository\ConfigRepository;
 use GuzzleHttp\Client;
 use Guzzle\Http\Exception\BadResponseException;
@@ -13,10 +17,14 @@ class NemRequestService
 
     public function __construct(
         EccubeConfig $eccubeConfig,
-        ConfigRepository $configRepository
+        EntityManagerInterface $entityManager,
+        ConfigRepository $configRepository,
+        OrderStatusRepository $orderStatusRepository
     ) {
         $this->eccubeConfig = $eccubeConfig;
+        $this->entityManager = $entityManager;
         $this->configRepository = $configRepository;
+        $this->orderStatusRepository = $orderStatusRepository;
 
         $this->Config = $this->configRepository->get();
 
@@ -34,8 +42,98 @@ class NemRequestService
         $parameter = ['address' => $this->Config->getSellerNemAddr()];
         
         $result = $this->req($url, $parameter);
+        dump($result);
         
-        return $result['data'];        
+        return $result->data;        
+    }
+
+    public function confirmNemRemittance($Orders)
+    {
+        $arrUpdateOrderId = [];
+
+        // キーを変換
+        $arrNemOrderTemp = [];
+        foreach ($Orders as $Order) {
+            $shortHash = $this->nemShoppingService->getShortHash($Order);
+            $arrNemOrderTemp[$shortHash] = $Order;
+        }
+        $arrNemOrder = $arrNemOrderTemp;
+
+        // NEM受信トランザクション取得
+        $arrData = $this->getIncommingTransaction();
+        dump($arrData);
+        foreach ($arrData as $data) {
+            if (isset($data->transaction->otherTrans)) {
+                $trans = $data->transaction->otherTrans;
+            } else {
+                $trans = $data->transaction;
+            }
+
+            if (empty($trans->message->payload)) {
+                continue;
+            }
+
+            $msg = pack("H*", $trans->message->payload);
+
+            // 対象受注
+            if (isset($arrNemOrder[$msg])) {
+                $Order = $arrNemOrder[$msg];
+
+                // トランザクションチェック
+                $transaction_id = $data->meta->id;
+                $NemHistoryes = $Order->getNemHistoryes();
+                if (!empty($NemHistoryes)) {
+                    $exist_flg = false;
+                    foreach ($NemHistoryes as $NemHistory) {
+                        if ($NemHistory->getTransactionId() == $transaction_id) {
+                            $exist_flg = true;
+                        }
+                    }
+
+                    if ($exist_flg) {
+                        logs('simple_nem_pay')->info("batch error: processed transaction. transaction_id = " . $transaction_id);
+                        continue;
+                    }
+                }
+
+                // トランザクション制御
+                $this->entityManager->beginTransaction();
+
+                $order_id = $Order->getId();
+                $amount = $trans['amount'] / 1000000;
+                $payment_amount = $Order->getPaymentAmount();
+                $remittance_amount = $Order->getRemittanceAmount();
+
+                $pre_amount = empty($remittance_amount) ? 0 : $remittance_amount;
+                $remittance_amount = $pre_amount + $amount;
+                $Order->setRemittanceAmount($remittance_amount);
+
+                $NemHistory = new NemHistory();
+                $NemHistory->setTransactionId($transaction_id);
+                $NemHistory->setAmount($amount);
+                $NemHistory->setNemOrder($Order);
+
+                logs('simple_nem_pay')->info("received. order_id = " . $order_id . " amount = " . $amount);
+
+                if ($payment_amount <= $remittance_amount) {
+                    $OrderStatus = $this->orderStatusRepository->find(OrderStatus::PAID);
+                    $Order->setOrderStatus($OrderStatus);
+                    $Order->setPaymentDate(new \DateTime());
+
+                    $this->sendPayEndMail($Order);
+                    logs('simple_nem_pay')->info("pay end. order_id = " . $order_id);
+                }
+
+                $arrUpdateOrderId[] = $order_id;
+
+                // 更新
+                $this->entityManager->persist($NemHistory);
+                $this->entityManager->flush();
+                $this->entityManager->commit();
+            }
+        }
+
+        return $arrUpdateOrderId;
     }
     
     function getRate() {
@@ -58,7 +156,9 @@ class NemRequestService
 
         $client = new Client($config);
         try {
-            $response = $client->get($url);
+            $response = $client->get($url, [
+                'query' => $qs,
+            ]);
         } catch (CurlException $e) {
             logs('simple_nem_pay')->info('CurlException. url=' . $url . ' error=' . $e);
             return false;
@@ -87,6 +187,7 @@ class NemRequestService
         //     $this->app['monolog.simple_nempay']->addInfo("nis error: unexpected response. url：". $url." parameter：".var_export($parameters, true));
         //     return false;
         // }
+        dump($response);
 
         $d = json_decode($response->getBody()->getContents());
         return $d;
@@ -104,7 +205,7 @@ class NemRequestService
         foreach ($parameters as $key => $value) {
             $queryParameters[] = $key . '=' . $this->_urlencode($value);
         }
-        return '?' . implode('&', $queryParameters);
+        return implode('&', $queryParameters);
     }
     
 }

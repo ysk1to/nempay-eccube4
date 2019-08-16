@@ -9,13 +9,15 @@ use Eccube\Repository\Master\PageMaxRepository;
 use Eccube\Repository\OrderRepository;
 use Eccube\Repository\PaymentRepository;
 use Eccube\Util\FormUtil;
-use Knp\Component\Pager\PaginatorInterface;
 use Plugin\SimpleNemPay\Form\Type\Admin\SearchPaymentType;
 use Plugin\SimpleNemPay\Service\Method\SimpleNemPay;
 use Plugin\SimpleNemPay\Repository\Master\NemStatusRepository;
-use Symfony\Component\Routing\Annotation\Route;
+use Plugin\SimpleNemPay\Service\NemRequestService;
+use Knp\Component\Pager\PaginatorInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
  * 決済状況管理
@@ -38,26 +40,19 @@ class PaymentStatusController extends AbstractController
     protected $orderRepository;
 
     /**
-     * @var array
-     */
-    protected $bulkActions = [
-        ['id' => 1, 'name' => '一括確認'],
-        ['id' => 2, 'name' => '一括取消'],
-        ['id' => 3, 'name' => '一括再オーソリ'],
-    ];
-
-    /**
      * PaymentController constructor.
      *
      * @param OrderStatusRepository $orderStatusRepository
      */
     public function __construct(
         NemStatusRepository $simpleNemStatusRepository,
+        NemRequestService $nemRequestService,
         PageMaxRepository $pageMaxRepository,
         OrderRepository $orderRepository,
         PaymentRepository $paymentRepository
     ) {
         $this->simpleNemStatusRepository = $simpleNemStatusRepository;
+        $this->nemRequestService = $nemRequestService;
         $this->pageMaxRepository = $pageMaxRepository;
         $this->orderRepository = $orderRepository;
         $this->paymentRepository = $paymentRepository;
@@ -165,8 +160,52 @@ class PaymentStatusController extends AbstractController
             'page_no' => $page_no,
             'page_count' => $page_count,
             'has_errors' => false,
-            'bulkActions' => $this->bulkActions,
         ];
+    }
+
+    /**
+     * 一括処理.
+     *
+     * @Route("/%eccube_admin_route%/simple_nem_pay/payment_status/request_action/", name="simple_nem_pay_admin_payment_status_request", methods={"POST"})
+     */
+    public function requestAction(Request $request)
+    {
+        $nem_request = $request->get('simple_nem_request');
+
+        if (!isset($nem_request)) {
+            throw new BadRequestHttpException();
+        }
+
+        $this->isTokenValid();
+
+        $requestOrderId = $request->get('simple_nem_order_id');
+        if (!empty($requestOrderId)) {
+            // 個別処理の場合
+            $ids = array($requestOrderId);
+        } else {
+            // 一括処理の場合
+            $ids = $request->get($nem_request . '_id');
+        }
+
+        $request_name = '決済状況確認';
+        /** @var Order[] $Orders */
+        $Orders = $this->orderRepository->findBy(['id' => $ids]);
+
+        foreach ($Orders as $Order) {
+            $nemErr = $this->nemRequestService->confirmNemRemittance($Order);
+
+            if (empty($nemErr)) {
+                $result_message = "■注文番号:" . $Order->getId() . " ： " . $request_name . "処理に成功しました。";
+
+                $this->addSuccess($result_message, 'admin');
+            } else {
+                $result_message = "■注文番号:" . $Order->getId() . " ： " . $request_name . "処理に失敗しました。" . $nemErr;
+
+                $this->addError($result_message, 'admin');
+            }
+        }
+
+        return $this->redirectToRoute('simple_nem_pay_admin_payment_status_pageno', ['resume' => Constant::ENABLED]);
     }
 
     private function createQueryBuilder(array $searchData)

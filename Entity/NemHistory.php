@@ -5,15 +5,15 @@ namespace Plugin\SimpleNemPay\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * SimpleNemHistory
+ * NemHistory
  * 
  * @ORM\Table(name="plg_simple_nem_pay_history")
  * @ORM\InheritanceType("JOINED")
  * @ORM\DiscriminatorColumn(name="discriminator_type", type="string", length=255)
  * @ORM\HasLifecycleCallbacks()
- * @ORM\Entity(repositoryClass="Plugin\SimpleNemPay\Repository\SimpleNemHistory")
+ * @ORM\Entity(repositoryClass="Plugin\SimpleNemPay\Repository\NemHistory")
  */
-class SimpleNemHistory extends \Eccube\Entity\AbstractEntity
+class NemHistory extends \Eccube\Entity\AbstractEntity
 {
 
     /**
@@ -28,7 +28,7 @@ class SimpleNemHistory extends \Eccube\Entity\AbstractEntity
     /**
      * @var Eccube\Entity\Order
      * 
-     * @ORM\ManyToOne(targetEntity="Eccube\Entity\Order", inversedBy="SimpleNemHistory")
+     * @ORM\ManyToOne(targetEntity="Eccube\Entity\Order", inversedBy="NemHistory")
      * @ORM\JoinColumns({
      *   @ORM\JoinColumn(name="order_id", referencedColumnName="id")
      * })

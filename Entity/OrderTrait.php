@@ -43,9 +43,9 @@ trait OrderTrait
     /**
      * @var \Doctrine\Common\Collections\Collection
      * 
-     * @ORM\OneToMany(targetEntity="Plugin\SimpleNemPay\Entity\SimpleNemHistory", mappedBy="Order", cascade={"persist", "remove"})
+     * @ORM\OneToMany(targetEntity="Plugin\SimpleNemPay\Entity\NemHistory", mappedBy="Order", cascade={"persist", "remove"})
      */
-    private $NemHistoryes;
+    private $NemHistories;
 
     /**
      * {@inheritdoc}
@@ -122,9 +122,9 @@ trait OrderTrait
     /**
      * {@inheritdoc}
      */
-    public function addSimpleNemHistory(\Plugin\SimpleNemPay\Entity\SimpleNemHistory $SimpleNemHistory)
+    public function addNemHistory(\Plugin\SimpleNemPay\Entity\NemHistory $NemHistory)
     {
-        $this->SimpleNemHistoryes[] = $SimpleNemHistory;
+        $this->NemHistories[] = $NemHistory;
 
         return $this;
     }
@@ -132,8 +132,8 @@ trait OrderTrait
     /**
      * {@inheritdoc}
      */
-    public function getSimpleNemHistoryes()
+    public function getNemHistories()
     {
-        return $this->SimpleNemHistoryes;
+        return $this->NemHistories;
     }
 }

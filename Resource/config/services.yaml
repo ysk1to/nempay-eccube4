@@ -7,3 +7,19 @@ parameters:
     env:
       sandbox: 1
       prod: 2
+monolog:
+    channels: ['simple_nem_pay']
+    handlers:
+        simple_nem_pay:
+            type: fingers_crossed
+            action_level: error
+            passthru_level: info
+            handler: simple_nem_pay_rotating_file
+            channels: ['simple_nem_pay']
+            channels: ['!event', '!doctrine']
+        simple_nem_pay_rotating_file:
+            type: rotating_file
+            max_files: 60
+            path: '%kernel.logs_dir%/%kernel.environment%/simple_nem_pay.log'
+            formatter: eccube.log.formatter.line
+            level: debug
