@@ -4,24 +4,22 @@ namespace Plugin\SimpleNemPay\Service;
 
 use Plugin\SimpleNemPay\Entity\NemOrder;
 use Plugin\SimpleNemPay\Entity\NemHistory;
-use Eccube\Application;
+use Plugin\SimpleNemPay\Repository\ConfigRepository;
+use Eccube\Common\EccubeConfig;
 use Eccube\Entity\MailHistory;
 use Eccube\Entity\Order;
 
 class NemShoppingService
 {
-    /** @var \Eccube\Application */
-    public $app;
-
-    /** @var array */
-    private $nemSettings;
-
-    public function __construct(Application $app, $cartService, $orderService)
-    {
-        $this->app = $app;
-
-        // かんたんNEM決済値読み込み
-        $this->nemSettings = $app['eccube.plugin.simple_nempay.repository.nem_info']->getNemSettings();
+    /**
+     * @param PurchaseFlow $shoppingPurchaseFlow
+     */
+    public function __construct(
+        ConfigRepository $configRepository,
+        EccubeConfig $eccubeConfig
+    ) {
+        $this->Config = $configRepository->get();
+        $this->auth_magic = $eccubeConfig->get('eccube_auth_magic');
     }
 
     /**
@@ -74,33 +72,7 @@ class NemShoppingService
         return $NemOrder;
     }
     
-    public function getPaymentInfo(NemOrder $NemOrder, $msg) {
-        $amount = $NemOrder->getPaymentAmount();
-        
-        $arrData = array();
-        $arrData['title']['name'] = 'かんたんNEM決済についてのご連絡';
-        $arrData['title']['value'] = true;
-        $arrData['qr_explain_title']['value'] = '【お支払いについてのご説明】';
-        $arrData['qr_explain']['value'] = <<< __EOS__
-お客様の注文はまだ決済が完了していません。
-お支払い情報に記載されている支払い先アドレスに指定の金額とメッセージを送信してください。
-送金から一定時間経過後、本サイトに反映され決済が完了します。
 
-※NanoWalletでQRコードをスキャンするとお支払い情報が読み込まれます。
-※メッセージが誤っている場合、注文に反映されませんのご注意ください。
-※送金金額が受付時の金額に満たない場合、決済は完了されません。複数回送金された場合は合算した金額で判定されます。
-
-__EOS__;
-        $arrData['pay_info']['value'] = '【お支払い情報】';
-        $arrData['address']['name'] = '支払先アドレス';
-        $arrData['address']['value'] = $this->nemSettings['seller_addr'];
-        $arrData['amount']['name'] = 'お支払い金額';
-        $arrData['amount']['value'] = $amount . ' XEM';
-        $arrData['message']['name'] = 'メッセージ';
-        $arrData['message']['value'] = $msg;
-        
-        return $arrData;
-    }
     
     function createQrcodeImage(Order $Order, $NemOrder, $msg) {
         $amount = $NemOrder->getPaymentAmount();
@@ -266,7 +238,7 @@ __EOS__;
     }
     
     function getShortHash(Order $Order) {
-        return rtrim(base64_encode(md5($this->nemSettings['seller_addr'] . $Order->getId() . $this->app['config']['auth_magic'], true)), '=');  
+        return rtrim(base64_encode(md5($this->Config->getSellerNemAddr() . $Order->getId() . $this->auth_magic, true)), '=');  
     }
 
 }
