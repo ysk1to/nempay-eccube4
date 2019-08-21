@@ -12,6 +12,7 @@ use Plugin\SimpleNemPay\Entity\Master\NemStatus;
 use Plugin\SimpleNemPay\Repository\Master\NemStatusRepository;
 use Plugin\SimpleNemPay\Service\NemShoppingService;
 use Symfony\Component\Form\FormInterface;
+use Endroid\QrCode\QrCode;
 
 class SimpleNemPay implements PaymentMethodInterface
 {
@@ -56,7 +57,10 @@ class SimpleNemPay implements PaymentMethodInterface
         $NemStatus = $this->nemStatusRepository->find(NemStatus::PAY_WATING);
         $this->Order->setNemStatus($NemStatus);
 
-        $this->setOrderCompleteMessages($this->getPaymentInfo());
+        $msg = $this->nemShoppingService->getShortHash($this->Order);
+        $pay_info = $this->getPaymentInfo($msg);
+
+        $this->setOrderCompleteMessages($pay_info, $msg);
 
         $this->purchaseFlow->commit($this->Order, new PurchaseContext());
 
@@ -66,9 +70,9 @@ class SimpleNemPay implements PaymentMethodInterface
         return $result;
     }
 
-    private function getPaymentInfo()
+    private function getPaymentInfo($msg)
     {
-        $msg = $this->nemShoppingService->getShortHash($this->Order);
+        
         $amount = $this->Order->getNemPaymentAmount();
         $sellerNemAddr = $this->Config->getSellerNemAddr();
 
@@ -97,7 +101,7 @@ __EOS__;
      * 決済情報を受注完了メッセージにセット
      * @param string pay_info
      */
-    private function setOrderCompleteMessages($pay_info)
+    private function setOrderCompleteMessages($pay_info, $msg)
     {
         $complete_mail_message = <<<__EOS__
 ************************************************
@@ -106,15 +110,30 @@ __EOS__;
 {$pay_info}
 __EOS__;
 
-        // URLをリンクに変換
-        $pay_info = preg_replace("/(http.*?)\\n/", "<a href='#' onClick=\"window.open('$1'); return false;\" >$1</a>\n", $pay_info);
         $pay_info = nl2br($pay_info, false);
+
+        // QRコード作成
+        $data = [
+            'v' => 2,
+            'type' => 2,
+            'data' =>
+            [
+                'addr' => $this->Config->getSellerNemAddr(),
+                'amount' => $this->Order->getNemPaymentAmount() * 1000000,
+                'msg' => $msg,
+                'name' => '',
+            ],
+        ];
+        $qrCode = new QrCode(json_encode($data));
+        $qrCode->setSize(300);
+        $img = base64_encode($qrCode->writeString());
 
         $complete_message = <<<__EOS__
 <div class="ec-rectHeading">
     <h2>■NEM決済情報</h2>
 </div>
 <p style="text-align:left; word-wrap: break-word; white-space: normal;">{$pay_info}</p>
+<img src="data:image/gif;base64,{$img}" />
 __EOS__;
 
         // 注文完了メールにメッセージを追加
