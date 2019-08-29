@@ -8,6 +8,8 @@ use Eccube\Entity\Master\OrderStatus;
 use Eccube\Repository\Master\OrderStatusRepository;
 use Plugin\SimpleNemPay\Entity\NemHistory;
 use Plugin\SimpleNemPay\Repository\ConfigRepository;
+use Plugin\SimpleNemPay\Repository\Master\NemStatusRepository;
+use Plugin\SimpleNemPay\Service\NemShoppingService;
 use GuzzleHttp\Client;
 use Guzzle\Http\Exception\BadResponseException;
 use Guzzle\Http\Exception\CurlException;
@@ -19,11 +21,15 @@ class NemRequestService
         EccubeConfig $eccubeConfig,
         EntityManagerInterface $entityManager,
         ConfigRepository $configRepository,
+        NemStatusRepository $nemStatusRepository,
+        NemShoppingService $nemShoppingService,
         OrderStatusRepository $orderStatusRepository
     ) {
         $this->eccubeConfig = $eccubeConfig;
         $this->entityManager = $entityManager;
         $this->configRepository = $configRepository;
+        $this->nemStatusRepository = $nemStatusRepository;
+        $this->nemShoppingService = $nemShoppingService;
         $this->orderStatusRepository = $orderStatusRepository;
 
         $this->Config = $this->configRepository->get();
@@ -47,16 +53,14 @@ class NemRequestService
         return $result->data;        
     }
 
-    public function confirmNemRemittance($Orders)
+    public function confirmNemRemittance($Order)
     {
-        $arrUpdateOrderId = [];
+        $isUpdate = false;
 
         // キーを変換
         $arrNemOrderTemp = [];
-        foreach ($Orders as $Order) {
-            $shortHash = $this->nemShoppingService->getShortHash($Order);
-            $arrNemOrderTemp[$shortHash] = $Order;
-        }
+        $shortHash = $this->nemShoppingService->getShortHash($Order);
+        $arrNemOrderTemp[$shortHash] = $Order;
         $arrNemOrder = $arrNemOrderTemp;
 
         // NEM受信トランザクション取得
@@ -81,7 +85,7 @@ class NemRequestService
 
                 // トランザクションチェック
                 $transaction_id = $data->meta->id;
-                $NemHistoryes = $Order->getNemHistoryes();
+                $NemHistoryes = $Order->getNemHistories();
                 if (!empty($NemHistoryes)) {
                     $exist_flg = false;
                     foreach ($NemHistoryes as $NemHistory) {
@@ -100,18 +104,18 @@ class NemRequestService
                 $this->entityManager->beginTransaction();
 
                 $order_id = $Order->getId();
-                $amount = $trans['amount'] / 1000000;
-                $payment_amount = $Order->getPaymentAmount();
-                $remittance_amount = $Order->getRemittanceAmount();
+                $amount = $trans->amount / 1000000;
+                $payment_amount = $Order->getNemPaymentAmount();
+                $remittance_amount = $Order->getNemRemittanceAmount();
 
                 $pre_amount = empty($remittance_amount) ? 0 : $remittance_amount;
                 $remittance_amount = $pre_amount + $amount;
-                $Order->setRemittanceAmount($remittance_amount);
+                $Order->setNemRemittanceAmount($remittance_amount);
 
                 $NemHistory = new NemHistory();
                 $NemHistory->setTransactionId($transaction_id);
                 $NemHistory->setAmount($amount);
-                $NemHistory->setNemOrder($Order);
+                $NemHistory->setOrder($Order);
 
                 logs('simple_nem_pay')->info("received. order_id = " . $order_id . " amount = " . $amount);
 
@@ -120,11 +124,14 @@ class NemRequestService
                     $Order->setOrderStatus($OrderStatus);
                     $Order->setPaymentDate(new \DateTime());
 
-                    $this->sendPayEndMail($Order);
+                    $NemStatus = $this->nemStatusRepository->find(NemStatus::PAY_DONE);
+                    $Order->setNemStatus($NemStatus);
+
+                    $this->nemShoppingService->sendPayEndMail($Order);
                     logs('simple_nem_pay')->info("pay end. order_id = " . $order_id);
                 }
 
-                $arrUpdateOrderId[] = $order_id;
+                $isUpdate = true;
 
                 // 更新
                 $this->entityManager->persist($NemHistory);
@@ -133,7 +140,7 @@ class NemRequestService
             }
         }
 
-        return $arrUpdateOrderId;
+        return $isUpdate;
     }
     
     function getRate() {

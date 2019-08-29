@@ -8,6 +8,7 @@ use Plugin\SimpleNemPay\Repository\ConfigRepository;
 use Eccube\Common\EccubeConfig;
 use Eccube\Entity\MailHistory;
 use Eccube\Entity\Order;
+use Eccube\Repository\BaseInfoRepository;
 
 class NemShoppingService
 {
@@ -15,11 +16,16 @@ class NemShoppingService
      * @param PurchaseFlow $shoppingPurchaseFlow
      */
     public function __construct(
+        \Swift_Mailer $mailer,
         ConfigRepository $configRepository,
-        EccubeConfig $eccubeConfig
+        EccubeConfig $eccubeConfig,
+        BaseInfoRepository $baseInfoRepository
     ) {
+        $this->mailer = $mailer;
         $this->Config = $configRepository->get();
         $this->auth_magic = $eccubeConfig->get('eccube_auth_magic');
+
+        $this->baseInfoRepository = $baseInfoRepository;
     }
 
     /**
@@ -188,16 +194,15 @@ class NemShoppingService
         return $arrUpdateOrderId;
     }
     
-    public function sendPayEndMail($NemOrder)
+    public function sendPayEndMail($Order)
     {
-        $BaseInfo = $this->app['eccube.repository.base_info']->get();
-        $Order = $NemOrder->getOrder();
-        
+        $BaseInfo = $this->baseInfoRepository->get();
+
         $order_id = $Order->getId();
         $name01 = $Order->getName01();
         $name02 = $Order->getName02();
         $payment_total = $Order->getPaymentTotal();
-        $payment_amount = $NemOrder->getPaymentAmount();
+        $payment_amount = $Order->getNemPaymentAmount();
 
         $body = <<< __EOS__
 {$name01} {$name02} 様
@@ -222,15 +227,15 @@ class NemShoppingService
 ご質問やご不明な点がございましたら、こちらからお願いいたします。
 __EOS__;
 
-        $message = \Swift_Message::newInstance()
+        $message = new \Swift_Message();
+        $message 
             ->setSubject('【' . $BaseInfo->getShopName() . '】かんたんNEM決済 送金確認通知')
             ->setFrom(array($BaseInfo->getEmail03() => $BaseInfo->getShopName()))
             ->setTo(array($Order->getEmail()))
             ->setBcc(array($BaseInfo->getEmail03() => $BaseInfo->getShopName()))
             ->setBody($body);
-        $this->app->mail($message);
 
-        $this->app['swiftmailer.spooltransport']->getSpool()->flushQueue($this->app['swiftmailer.transport']);
+        $count = $this->mailer->send($message);
     }
     
     function getQrcodeImagePath(Order $Order) {
