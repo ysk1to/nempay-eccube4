@@ -2,13 +2,17 @@
 
 namespace Plugin\SimpleNemPay\Service;
 
-use Plugin\SimpleNemPay\Entity\NemOrder;
-use Plugin\SimpleNemPay\Entity\NemHistory;
-use Plugin\SimpleNemPay\Repository\ConfigRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Eccube\Common\EccubeConfig;
-use Eccube\Entity\MailHistory;
+use Eccube\Entity\Master\OrderStatus;
 use Eccube\Entity\Order;
 use Eccube\Repository\BaseInfoRepository;
+use Eccube\Repository\Master\OrderStatusRepository;
+use Plugin\SimpleNemPay\Entity\Master\NemStatus;
+use Plugin\SimpleNemPay\Entity\NemHistory;
+use Plugin\SimpleNemPay\Repository\ConfigRepository;
+use Plugin\SimpleNemPay\Repository\Master\NemStatusRepository;
+use Plugin\SimpleNemPay\Service\NemRequestService;
 
 class NemShoppingService
 {
@@ -16,128 +20,58 @@ class NemShoppingService
      * @param PurchaseFlow $shoppingPurchaseFlow
      */
     public function __construct(
+        EntityManagerInterface $entityManager,
         \Swift_Mailer $mailer,
         ConfigRepository $configRepository,
         EccubeConfig $eccubeConfig,
-        BaseInfoRepository $baseInfoRepository
+        NemStatusRepository $nemStatusRepository,
+        NemRequestService $nemRequestService,
+        BaseInfoRepository $baseInfoRepository,
+        OrderStatusRepository $orderStatusRepository
     ) {
+        $this->entityManager = $entityManager;
         $this->mailer = $mailer;
         $this->Config = $configRepository->get();
         $this->auth_magic = $eccubeConfig->get('eccube_auth_magic');
 
+        $this->nemStatusRepository = $nemStatusRepository;
+        $this->nemRequestService = $nemRequestService;
         $this->baseInfoRepository = $baseInfoRepository;
+        $this->orderStatusRepository = $orderStatusRepository;
     }
 
-    /**
-     * 受注メール送信を行う
-     *
-     * @param Order $Order
-     * @return MailHistory
-     */
-    public function sendOrderMail(Order $Order)
+    public function confirmNemRemittance($Order)
     {
-        // メール送信
-        $message = $this->app['eccube.plugin.simple_nempay.service.nem_mail']->sendOrderMail($Order);
+        $isUpdate = false;
 
-        // 送信履歴を保存.
-        $MailTemplate = $this->app['eccube.repository.mail_template']->find(1);
-
-        $MailHistory = new MailHistory();
-        $MailHistory
-            ->setSubject($message->getSubject())
-            ->setMailBody($message->getBody())
-            ->setMailTemplate($MailTemplate)
-            ->setSendDate(new \DateTime())
-            ->setOrder($Order);
-
-        $this->app['orm.em']->persist($MailHistory);
-        $this->app['orm.em']->flush($MailHistory);
-
-        return $MailHistory;
-
-    }
-
-    /**
-     * Nemの受注情報を登録
-     *
-     * @param Order $Order
-     */
-    public function getNemOrder(Order $Order)
-    {
-        $NemOrder = $this->app['eccube.plugin.simple_nempay.repository.nem_order']->findOneBy(array('Order' => $Order));
-        
-        if (empty($NemOrder)) {
-            // Nem受注情報を登録
-            $NemOrder = new NemOrder();
-            $NemOrder->setOrder($Order);
-            
-            $this->app['orm.em']->persist($NemOrder);
-            $this->app['orm.em']->flush();
-        }
-
-        return $NemOrder;
-    }
-    
-
-    
-    function createQrcodeImage(Order $Order, $NemOrder, $msg) {
-        $amount = $NemOrder->getPaymentAmount();
-        
-        $arrData = array(
-            'v' => 2,
-            'type' => 2,
-            'data' => 
-                array (
-                    'addr' => $this->nemSettings['seller_addr'],
-                    'amount' => $amount * 1000000,
-                    'msg' => $msg,
-                    'name' => '',
-            ),
-        );
-        
-        $filepath = $this->getQrcodeImagePath($Order);
-
-        // $qr = new \Image_QRCode();
-        // $image = $qr->makeCode(json_encode($arrData), 
-        //                        array('output_type' => 'return'));
-        // imagepng($image, $filepath);
-        // imagedestroy($image);
-    }
-    
-    function confirmNemRemittance($arrNemOrder) {
-        $arrUpdateOrderId = array();
-              
         // キーを変換
-        $arrNemOrderTemp = array();
-        foreach ($arrNemOrder as $NemOrder) {
-            $shortHash = $this->app['eccube.plugin.simple_nempay.service.nem_shopping']->getShortHash($NemOrder->getOrder());
-            $arrNemOrderTemp[$shortHash] = $NemOrder;
-        }
+        $arrNemOrderTemp = [];
+        $shortHash = $this->getShortHash($Order);
+        $arrNemOrderTemp[$shortHash] = $Order;
         $arrNemOrder = $arrNemOrderTemp;
-        
+
         // NEM受信トランザクション取得
-        $arrData = $this->app['eccube.plugin.simple_nempay.service.nem_request']->getIncommingTransaction();
-		foreach ($arrData as $data) {
-            if (isset($data['transaction']['otherTrans'])) {
-                $trans = $data['transaction']['otherTrans'];
+        $arrData = $this->nemRequestService->getIncommingTransaction();
+        foreach ($arrData as $data) {
+            if (isset($data->transaction->otherTrans)) {
+                $trans = $data->transaction->otherTrans;
             } else {
-                $trans = $data['transaction'];
+                $trans = $data->transaction;
             }
-            
-            if (empty($trans['message']['payload'])) {
+
+            if (empty($trans->message->payload)) {
                 continue;
             }
-            
-            $msg = pack("H*", $trans['message']['payload']);
-            
+
+            $msg = pack("H*", $trans->message->payload);
+
             // 対象受注
             if (isset($arrNemOrder[$msg])) {
-                $NemOrder = $arrNemOrder[$msg];
-                $Order = $NemOrder->getOrder();
-                
+                $Order = $arrNemOrder[$msg];
+
                 // トランザクションチェック
-                $transaction_id = $data['meta']['id'];
-                $NemHistoryes = $NemOrder->getNemHistoryes();
+                $transaction_id = $data->meta->id;
+                $NemHistoryes = $Order->getNemHistories();
                 if (!empty($NemHistoryes)) {
                     $exist_flg = false;
                     foreach ($NemHistoryes as $NemHistory) {
@@ -145,55 +79,56 @@ class NemShoppingService
                             $exist_flg = true;
                         }
                     }
-                    
+
                     if ($exist_flg) {
-						$this->app['monolog.simple_nempay']->addInfo("batch error: processed transaction. transaction_id = " . $transaction_id);
+                        logs('simple_nem_pay')->info("batch error: processed transaction. transaction_id = " . $transaction_id);
                         continue;
-                    }       
+                    }
                 }
-                
+
                 // トランザクション制御
-                $em = $this->app['orm.em'];
-                $em->getConnection()->beginTransaction();
-                
+                $this->entityManager->beginTransaction();
+
                 $order_id = $Order->getId();
-                $amount = $trans['amount'] / 1000000;
-                $payment_amount = $NemOrder->getPaymentAmount();
-                $remittance_amount = $NemOrder->getRemittanceAmount();
-                
+                $amount = $trans->amount / 1000000;
+                $payment_amount = $Order->getNemPaymentAmount();
+                $remittance_amount = $Order->getNemRemittanceAmount();
+
                 $pre_amount = empty($remittance_amount) ? 0 : $remittance_amount;
                 $remittance_amount = $pre_amount + $amount;
-                $NemOrder->setRemittanceAmount($remittance_amount);
-                
+                $Order->setNemRemittanceAmount($remittance_amount);
+
                 $NemHistory = new NemHistory();
                 $NemHistory->setTransactionId($transaction_id);
                 $NemHistory->setAmount($amount);
-                $NemHistory->setNemOrder($NemOrder);
+                $NemHistory->setOrder($Order);
 
-				$this->app['monolog.simple_nempay']->addInfo("received. order_id = " . $order_id . " amount = " . $amount);
+                logs('simple_nem_pay')->info("received. order_id = " . $order_id . " amount = " . $amount);
 
                 if ($payment_amount <= $remittance_amount) {
-                    $OrderStatus = $this->app['eccube.repository.order_status']->find($this->app['config']['order_pre_end']);
+                    $OrderStatus = $this->orderStatusRepository->find(OrderStatus::PAID);
                     $Order->setOrderStatus($OrderStatus);
                     $Order->setPaymentDate(new \DateTime());
-					
-					$this->sendPayEndMail($NemOrder);
-					$this->app['monolog.simple_nempay']->addInfo("pay end. order_id = " . $order_id);
+
+                    $NemStatus = $this->nemStatusRepository->find(NemStatus::PAY_DONE);
+                    $Order->setNemStatus($NemStatus);
+
+                    $this->sendPayEndMail($Order);
+                    logs('simple_nem_pay')->info("pay end. order_id = " . $order_id);
                 }
-                
-                $arrUpdateOrderId[] = $order_id;
-                
+
+                $isUpdate = true;
+
                 // 更新
-                $em->persist($NemHistory);
-                $em->commit();
-                $em->flush();				
+                $this->entityManager->persist($NemHistory);
+                $this->entityManager->flush();
+                $this->entityManager->commit();
             }
-            
-		}
-        
-        return $arrUpdateOrderId;
+        }
+
+        return $isUpdate;
     }
-    
+
     public function sendPayEndMail($Order)
     {
         $BaseInfo = $this->baseInfoRepository->get();

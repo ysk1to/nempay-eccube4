@@ -3,10 +3,10 @@
 namespace Plugin\SimpleNemPay\Command;
 
 use Doctrine\Bundle\DoctrineBundle\Command\DoctrineCommand;
+use Eccube\Repository\OrderRepository;
 use Plugin\SimpleNemPay\Entity\Master\NemStatus;
 use Plugin\SimpleNemPay\Repository\Master\NemStatusRepository;
-use Plugin\SimpleNemPay\Service\NemRequestService;
-use Eccube\Repository\OrderRepository;
+use Plugin\SimpleNemPay\Service\NemShoppingService;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -19,12 +19,12 @@ class RemittanceConfirmBatchCommand extends DoctrineCommand
 
     public function __construct(
         NemStatusRepository $nemStatusRepository,
-        NemRequestService $nemRequestService,
+        NemShoppingService $nemShoppingService,
         OrderRepository $orderRepository
     ) {
         parent::__construct();
         $this->nemStatusRepository = $nemStatusRepository;
-        $this->nemRequestService = $nemRequestService;
+        $this->nemShoppingService = $nemShoppingService;
         $this->orderRepository = $orderRepository;
     }
 
@@ -43,7 +43,7 @@ class RemittanceConfirmBatchCommand extends DoctrineCommand
         }
 
         foreach ($Orders as $Order) {
-            $this->nemRequestService->confirmNemRemittance($Order);
+            $this->nemShoppingService->confirmNemRemittance($Order);
         }
     }
 }

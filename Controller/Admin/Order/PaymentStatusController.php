@@ -11,8 +11,7 @@ use Eccube\Repository\PaymentRepository;
 use Eccube\Util\FormUtil;
 use Plugin\SimpleNemPay\Form\Type\Admin\SearchPaymentType;
 use Plugin\SimpleNemPay\Service\Method\SimpleNemPay;
-use Plugin\SimpleNemPay\Repository\Master\NemStatusRepository;
-use Plugin\SimpleNemPay\Service\NemRequestService;
+use Plugin\SimpleNemPay\Service\NemShoppingService;
 use Knp\Component\Pager\PaginatorInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Component\Routing\Annotation\Route;
@@ -45,14 +44,12 @@ class PaymentStatusController extends AbstractController
      * @param OrderStatusRepository $orderStatusRepository
      */
     public function __construct(
-        NemStatusRepository $simpleNemStatusRepository,
-        NemRequestService $nemRequestService,
+        NemShoppingService $nemShoppingService,
         PageMaxRepository $pageMaxRepository,
         OrderRepository $orderRepository,
         PaymentRepository $paymentRepository
     ) {
-        $this->simpleNemStatusRepository = $simpleNemStatusRepository;
-        $this->nemRequestService = $nemRequestService;
+        $this->nemShoppingService = $nemShoppingService;
         $this->pageMaxRepository = $pageMaxRepository;
         $this->orderRepository = $orderRepository;
         $this->paymentRepository = $paymentRepository;
@@ -187,12 +184,11 @@ class PaymentStatusController extends AbstractController
             $ids = $request->get($nem_request . '_id');
         }
 
-        $request_name = '決済状況確認';
         /** @var Order[] $Orders */
         $Orders = $this->orderRepository->findBy(['id' => $ids]);
 
         foreach ($Orders as $Order) {
-            $result = $this->nemRequestService->confirmNemRemittance($Order);
+            $result = $this->nemShoppingService->confirmNemRemittance($Order);
 
             if ($result) {
                 $result_message = "■注文番号:" . $Order->getId() . " ： " . "送金を確認しました。";
@@ -217,7 +213,7 @@ class PaymentStatusController extends AbstractController
             ->addOrderBy('o.id', 'DESC');
 
         // かんたんNEM決済のみ
-        $Payment = $this->paymentRepository->findOneBy(array('method_class' => SimpleNemPay::class));
+        $Payment = $this->paymentRepository->findOneBy(['method_class' => SimpleNemPay::class]);
         $qb->andWhere('o.Payment = :Payment')
             ->setParameter('Payment', $Payment)
             ->andWhere('o.NemStatus IS NOT NULL');
