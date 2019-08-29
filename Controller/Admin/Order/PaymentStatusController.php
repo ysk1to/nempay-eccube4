@@ -181,7 +181,7 @@ class PaymentStatusController extends AbstractController
         $requestOrderId = $request->get('simple_nem_order_id');
         if (!empty($requestOrderId)) {
             // 個別処理の場合
-            $ids = array($requestOrderId);
+            $ids = [$requestOrderId];
         } else {
             // 一括処理の場合
             $ids = $request->get($nem_request . '_id');
@@ -192,14 +192,14 @@ class PaymentStatusController extends AbstractController
         $Orders = $this->orderRepository->findBy(['id' => $ids]);
 
         foreach ($Orders as $Order) {
-            $nemErr = $this->nemRequestService->confirmNemRemittance($Order);
+            $result = $this->nemRequestService->confirmNemRemittance($Order);
 
-            if (empty($nemErr)) {
-                $result_message = "■注文番号:" . $Order->getId() . " ： " . $request_name . "処理に成功しました。";
+            if ($result) {
+                $result_message = "■注文番号:" . $Order->getId() . " ： " . "送金を確認しました。";
 
                 $this->addSuccess($result_message, 'admin');
             } else {
-                $result_message = "■注文番号:" . $Order->getId() . " ： " . $request_name . "処理に失敗しました。" . $nemErr;
+                $result_message = "■注文番号:" . $Order->getId() . " ： " . "最新の送金情報はありませんでした。";
 
                 $this->addError($result_message, 'admin');
             }
