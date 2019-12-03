@@ -10,7 +10,11 @@ use Guzzle\Http\Exception\CurlException;
 
 class NemRequestService
 {
-
+    /**
+     * NemRequestService constructor.
+     * @param EccubeConfig $eccubeConfig
+     * @param ConfigRepository $configRepository
+     */
     public function __construct(
         EccubeConfig $eccubeConfig,
         ConfigRepository $configRepository
