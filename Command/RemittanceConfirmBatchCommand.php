@@ -36,7 +36,7 @@ class RemittanceConfirmBatchCommand extends DoctrineCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         // 対象の受注を取得
-        $NemStatus = $this->nemStatusRepository->find(NemStatus::PAY_WATING);
+        $NemStatus = $this->nemStatusRepository->find(NemStatus::PAY_WAITING);
         $Orders = $this->orderRepository->findBy(['NemStatus' => $NemStatus]);
         if (empty($Orders)) {
             return;

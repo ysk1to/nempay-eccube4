@@ -54,7 +54,7 @@ class SimpleNemPay implements PaymentMethodInterface
      */ 
     public function checkout()
     {
-        $NemStatus = $this->nemStatusRepository->find(NemStatus::PAY_WATING);
+        $NemStatus = $this->nemStatusRepository->find(NemStatus::PAY_WAITING);
         $this->Order->setNemStatus($NemStatus);
 
         $msg = $this->nemShoppingService->getShortHash($this->Order);

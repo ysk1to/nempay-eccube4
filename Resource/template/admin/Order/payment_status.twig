@@ -167,7 +167,7 @@
                                     </thead>
                                     <tbody>
                                     {% set cssClassNemStatus = {
-                                        (constant('Plugin\\SimpleNemPay\\Entity\\Master\\NemStatus::PAY_WATING')): "badge-ec-blue",
+                                        (constant('Plugin\\SimpleNemPay\\Entity\\Master\\NemStatus::PAY_WAITING')): "badge-ec-blue",
                                         (constant('Plugin\\SimpleNemPay\\Entity\\Master\\NemStatus::PAY_DONE')): "badge-ec-green",
                                     }
                                     %}
@@ -178,7 +178,7 @@
                                             <td class="align-middle text-center" id="name--{{ Order.id }}">{{ Order.name01 }} {{ Order.name02 }}</td>
                                             <td class="align-middle text-right" id="payment_total--{{ Order.id }}">{{ Order.payment_total|price }}</td>
                                             <td class="align-middle text-center">
-                                                {% if Order.NemStatus.id == constant('Plugin\\SimpleNemPay\\Entity\\Master\\NemStatus::PAY_WATING') %}
+                                                {% if Order.NemStatus.id == constant('Plugin\\SimpleNemPay\\Entity\\Master\\NemStatus::PAY_WAITING') %}
                                                     <input type="checkbox" name="confirm_id[]" id="confirm_check_{{ Order.id }}" value="{{ Order.id }}"/>
                                                 {% endif %}
                                             </td>
