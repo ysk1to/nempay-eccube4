@@ -41,7 +41,10 @@ class PaymentStatusController extends AbstractController
     /**
      * PaymentController constructor.
      *
-     * @param OrderStatusRepository $orderStatusRepository
+     * @param NemShoppingService $nemShoppingService
+     * @param PageMaxRepository $pageMaxRepository
+     * @param OrderRepository $orderRepository
+     * @param PaymentRepository $paymentRepository
      */
     public function __construct(
         NemShoppingService $nemShoppingService,

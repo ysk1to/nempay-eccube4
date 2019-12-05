@@ -15,9 +15,9 @@ class SimpleNemPayEvent implements EventSubscriberInterface
 
     /**
      * SimpleNemPayEvent
-     * 
-     * @param eccubeConfig $eccubeConfig
-     * @param ConfigRepository $configRepository
+     *
+     * @param EntityManagerInterface $entityManager
+     * @param NemRequestService $nemRequestService
      */
     public function __construct(
         EntityManagerInterface $entityManager,

@@ -17,7 +17,14 @@ use Plugin\SimpleNemPay\Service\NemRequestService;
 class NemShoppingService
 {
     /**
-     * @param PurchaseFlow $shoppingPurchaseFlow
+     * @param EntityManagerInterface $entityManager
+     * @param \Swift_Mailer $mailer
+     * @param ConfigRepository $configRepository
+     * @param EccubeConfig $eccubeConfig
+     * @param NemStatusRepository $nemStatusRepository
+     * @param \Plugin\SimpleNemPay\Service\NemRequestService $nemRequestService
+     * @param BaseInfoRepository $baseInfoRepository
+     * @param OrderStatusRepository $orderStatusRepository
      */
     public function __construct(
         EntityManagerInterface $entityManager,

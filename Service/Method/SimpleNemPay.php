@@ -18,6 +18,9 @@ class SimpleNemPay implements PaymentMethodInterface
 {
     /**
      * @param PurchaseFlow $shoppingPurchaseFlow
+     * @param ConfigRepository $configRepository
+     * @param NemStatusRepository $nemStatusRepository
+     * @param NemShoppingService $nemShoppingService
      */
     public function __construct(
             PurchaseFlow $shoppingPurchaseFlow,
