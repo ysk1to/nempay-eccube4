@@ -16,7 +16,7 @@ class NemStatus extends AbstractMasterEntity
     /**
      * 送金待ち
      */
-    const PAY_WATING = 1;
+    const PAY_WAITING = 1;
 
     /**
      * 送金済み
